@@ -2,7 +2,7 @@ from realtor import Realtor
 
 
 class House:
-    __list_unique_num = [0, ]
+    __last_id = 0
 
     def __init__(self, price, area=40):
         self.area = area
@@ -12,8 +12,8 @@ class House:
 
     @classmethod
     def __set_unique_id(cls):
-        house_id = cls.__list_unique_num[-1] + 1
-        cls.__list_unique_num.append(house_id)
+        house_id = cls.__last_id + 1
+        cls.__last_id = house_id
         return house_id
 
     def put_up_for_sales(self):
