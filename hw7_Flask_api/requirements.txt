@@ -1,0 +1,5 @@
+
+Flask==2.2.3
+psutil==5.9.4
+PyYAML==6.0
+toml==0.10.2
