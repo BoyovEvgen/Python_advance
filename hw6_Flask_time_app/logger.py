@@ -26,7 +26,7 @@ class Log(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     date_time = Column(DateTime, default=datetime.datetime.now())
     level_log = Column(String(50))
-    message = Column(String(255))
+    message = Column(String(100))
 
 
 class SQLAlchemyHandler(logging.Handler):

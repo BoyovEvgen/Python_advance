@@ -1,6 +1,7 @@
 from flask import Flask, abort
 from datetime import datetime, timedelta, timezone
 from logger import logger
+from utils import get_documentation
 
 
 app = Flask(__name__)
@@ -35,10 +36,6 @@ def get_current_datetime(tz=None):
 def get_description():
     logger.info(f'Review documentation')
     return get_documentation(get_current_datetime)
-
-
-def get_documentation(func):
-    return func.__doc__.replace('\n', '<p>')
 
 
 if __name__ == '__main__':
