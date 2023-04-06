@@ -111,3 +111,36 @@ class PBar {
         return this.#_instances
     }
 }
+
+
+
+
+
+const URL = window.location.href.split('/')
+const URL_update = URL.slice(0, -1).join('/') + '/stats/virtual_memory'
+
+async function get_statistics() {
+    const response = await fetch(URL_update);
+    const data = await response.json();
+    return data;
+}
+
+async function innerHTML() {
+    const data= await get_statistics();
+    console.log(data['percent'])
+    var gauge = document.getElementById('gauge');
+    gauge.innerHTML = '<div class="bar" style="background-color: rgb(72, 239, 82);' +
+                      'transform: translate(' + data['percent'] + '%);">' +
+                      '<div class="data" style="display: flex;' +
+                      'justify-content: center;' +
+                      'position: absolute;' +
+                      'right: 0;' +
+                      'width: ' + data['percent'] + '%;">' +
+                      data['percent'] + '%</div></div>';
+
+    var teg_span = document.getElementById('my-span');
+    var text = `Available memory: ${round(data['free']/(1024 ** 2), 2)} / ${round(data['total']/(1024 ** 2), 2)} MiB`
+    teg_span.innerHTML = text
+}
+
+innerHTML()

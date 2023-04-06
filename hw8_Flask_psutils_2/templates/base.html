@@ -6,16 +6,13 @@
   <meta name="description" content="HTML5">
   <meta name="author" content="Author">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Memory statistics</title>
-  <link rel="stylesheet" href="/assets/style.css">
+  <title>{{ pagetitle }}</title>
+  <link rel="stylesheet" href="{{ url_for('assets.static', filename='style.css') }}">
   <!-- <link rel="icon" href="./favicon.ico" type="image/x-icon"> -->
 </head>
 <body>
-  <h1>Memory Stats:</h1>
-  <span>Available memory: MEM_FREE / MEM_TOTAL MiB</span>
-  <div class="pbar" id="mem">
-    <!-- use js to fill it on client-side -->
-  </div> 
-  <script src="/assets/script.js"></script>
+  <h1>{{ statname | title }} Stats:</h1>
+  {% block content %}
+  {% endblock %}
 </body>
 </html>

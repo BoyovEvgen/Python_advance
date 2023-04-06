@@ -19,12 +19,14 @@ app.register_blueprint(assets, url_prefix='/')
 
 @app.route('/memory')
 def memory():
-    mem = methods['virtual_memory'](format=None)
-    app.logger.debug('Got memory data:\n\t %r', mem)
+    """
+    add a template rendering route where progressbar gets filled
+    on client-side, with requests done using js fetch() method.
+    Some basics can be filled on server-side though, like page title
+    """
     return render_template('memory.html',
                            pagetitle='Memory statistics',
-                           statname='memory',
-                           mem=mem
+                           statname='memory'
                            )
 
 # TODO: add a template rendering route where progressbar gets filled
@@ -35,13 +37,21 @@ def memory():
 #       - with js dynamically updating its data
 # TODO(extra): try extracting common template values into jinja block in separate file
 #       and use template inheritance
+
+
 @app.route('/memory-client')
 def memory_client():
-    ...
-    # add logic here
-    ...
-    return render_template('memory-client.html')
-
+    """
+     - to make server return server-side rendered page
+     - with js dynamically updating its data
+    """
+    mem = methods['virtual_memory'](format=None)
+    app.logger.debug('Got memory data:\n\t %r', mem)
+    return render_template('memory_client.html',
+                           pagetitle='Memory statistics',
+                           statname='memory',
+                           mem=mem
+                           )
 
 
 @app.route('/stats/')
