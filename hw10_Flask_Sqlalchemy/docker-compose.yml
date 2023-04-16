@@ -1,0 +1,16 @@
+x-docker-options: --rm
+
+version: '3'
+services:
+  db:
+    image: postgres
+    container_name: postgres_container
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: postgres_db
+    volumes:
+      - ./data_docker:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"

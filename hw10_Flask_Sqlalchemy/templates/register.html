@@ -1,0 +1,14 @@
+{% extends 'main.html' %}
+
+{% block content %}
+  <form method="POST" action="{{ url_for('register') }}">
+        {{ form.hidden_tag() }}
+        {{ form.username.label }} {{ form.username() }}
+        {{ form.old.label }} {{ form.old() }}
+        {{ form.city.label }} {{ form.city() }}
+        {{ form.email.label }} {{ form.email() }}
+        {{ form.password.label }} {{ form.password() }}
+        {{ form.confirm_password.label }} {{ form.confirm_password() }}
+        {{ form.submit() }}
+    </form>
+{% endblock %}
