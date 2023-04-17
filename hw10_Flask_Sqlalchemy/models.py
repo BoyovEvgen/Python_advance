@@ -22,7 +22,7 @@ class ReprMixin:
 class Users(db.Model, ReprMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), unique=True)
-    password = db.Column(db.String(500), nullable=True)
+    password = db.Column(db.String(50), nullable=True)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
     pr = db.relationship('Profiles', backref='users', uselist=False)
