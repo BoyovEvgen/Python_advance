@@ -1,11 +1,17 @@
 import catday
 import models   # Flask-SQLAlchemy
-from models import db
+from models import db, login_manager
 from controllers import Storage, StorageError
 from flask import Flask, Response, request, abort, send_file, render_template
+from flask_login import login_required
+from utils.check_admin_decorator import admin_required
+
+
 import logging
 
 app = Flask(__name__)
+
+login_manager.init_app(app)
 
 # We use SQLite for testing
 # (!) But it is embeddable db not suitable to serve online users
@@ -16,13 +22,15 @@ db.init_app(app)
 # Limit maximum incoming length to 16 MiB
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 # This is our own controller
-storage = Storage(directory='uploads', db=db, model=models.File)
+storage = Storage(directory='uploads', db=db, model=models.File, max_file_size=5000000)  # 5MB
 storage.init_app(app)
+
 
 # Add all catday routes
 app.register_blueprint(catday.cats_bp, url_prefix='/cats')
 # a hack to make app logger accessible
 catday.cats_bp.logger = app.logger
+catday.cats_bp.storage = storage
 
 
 @app.route('/')
@@ -37,6 +45,8 @@ def hello_world():
 # Below is minimal example. Uploads (as well as any other user input)
 # should be handled with caution and never trusted
 @app.route('/upload', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def upload():
     msg = ''
 

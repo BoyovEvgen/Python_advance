@@ -12,6 +12,7 @@ import PIL.Image
 import pathlib as pth
 import random
 
+
 from time import perf_counter
 
 # Directory containing cat images,
@@ -50,15 +51,17 @@ def find_cat_file(numext, try_random=False):
     # num specifies the cat image to use
     # if num is omitted, and try_random is True, random cat should appear
     if try_random is True and not base:
-        num = random.randint(0, len(CATS) - 1)
+        # num = random.randint(0, len(CATS) - 1)
+        num = random.choice(cats_bp.storage.get_all_id())
     else:
         num = int(base)      # try integer conversion
     
     if num < 0 or num > len(CATS) - 1:
         raise ValueError
-    
-    return CATS[num], base, ext
-
+    # return CATS[num], base, ext
+    print(num)
+    file, filename = cats_bp.storage.load(filename_or_id=num)
+    return file, filename, base, ext
 
 def get_cat(numext, try_random=False):
     try:
@@ -67,9 +70,10 @@ def get_cat(numext, try_random=False):
     except ValueError:      # integer unconvertable or wrong range
         abort(404, 'Wrong image number')
     else:
+        file, filename, base, ext = ret
         cats_bp.logger.debug('Retrieve image "%s" for '
                         'base %s with ext "%s"',
-                        *ret)
+                        filename, base, ext)
         return ret
 
 
@@ -96,15 +100,15 @@ def list_cats():
 def cat_original(num, ext):
     t_start = perf_counter()    # measure request time
 
-    file, base, ext = get_cat(f'{num}.{ext}', try_random=False)
+    file, filename, base, ext = get_cat(f'{num}.{ext}', try_random=False)
 
     name = f'cat{base}{ext}'   # the filename passed to browser
     
-    cats_bp.logger.debug('Original extension is %s', file.suffix)
+    # cats_bp.logger.debug('Original extension is %s', file.suffix)
     
     # if the extension is different, perform conversion with PIL
-    if ext.lower() != file.suffix.lower():
-        
+    # if ext.lower() != file.suffix.lower():
+    if ext.lower() != filename.split('.')[-1]:
         try:
             img = PIL.Image.open(file)
             # Save to buffer in memory and serve with Flask
@@ -129,7 +133,7 @@ def cat_original(num, ext):
 
 @cats_bp.route('/catoftheday<name>')
 def cat_modified(name):
-    file, base, ext = get_cat(name, try_random=True)
+    file, filename, base, ext = get_cat(name, try_random=True)
 
     date = utils.DateTriple()       # try UADateTriple() here
     date_suffix = date.tostr(fmt='{day}_{month:.3}').lower()

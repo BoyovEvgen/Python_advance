@@ -1,9 +1,11 @@
 from utils import ModelBase
 from utils import upload
 from flask_sqlalchemy import SQLAlchemy
-
 import datetime
 import hashlib
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin, LoginManager
+
 
 from typing import List, Optional
 from sqlalchemy import String, DateTime, ForeignKey
@@ -14,6 +16,23 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 db = SQLAlchemy(model_class=ModelBase)
 # model_class to use our customized base (not default one)
+login_manager = LoginManager()
+
+
+class User(UserMixin, db.Model):
+    # __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(20), nullable=False, unique=True)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    password_hash = db.Column(db.String(128))
+    is_admin = db.Column(db.Boolean, default=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
 
 class File(db.Model):
     # (using older style):
@@ -67,6 +86,19 @@ class File(db.Model):
         if found is None:
             raise LookupError
         return found
+
+    @classmethod
+    def get_all_id(cls):
+        """Get all file IDs from database"""
+        all_instances = cls.query.all()
+        id_list = [instance.id for instance in all_instances]
+        return id_list
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 
 
 

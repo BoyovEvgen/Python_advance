@@ -2,12 +2,15 @@
 
 Controllers serve as a middleware between Model and View
 """
+import os
+import zlib
 
 import models
+# from hw11_Flask_practice import utils
 from utils import upload
 import datetime as dt
 import pathlib as pth
-
+import PIL.Image
 import typing as t
 import io
 
@@ -28,14 +31,16 @@ class FileExistsError(StorageError):
 
 class Storage:
     """Provides interface to files based on File model."""
-    __slots__ = 'dir', 'db', '_Model'
+    __slots__ = 'dir', 'db', '_Model', 'max_file_size'
 
-    def __init__(self, directory, db, model):
+    def __init__(self, directory, db, model, max_file_size):
         self.dir = pth.Path(directory)
         self.db = db
         self._Model = model
+        self.max_file_size = max_file_size
         # ensure directory exists
         self.dir.mkdir(exist_ok=True)
+
 
     def init_app(self, app):
         """Bind storage to app to make it accessible as app.storage."""
@@ -51,7 +56,7 @@ class Storage:
             filename = filename_or_id
         filename = self._lookup_filename(filename)
         file = open(file=filename, mode='rb', **kwargs)
-        return file
+        return file, filename
 
     def __getitem__(self, filename_or_id):
         """Alias to load() method with default arguments"""
@@ -118,6 +123,15 @@ class Storage:
             autocommit: whether to automatically push File entry to db
                         or just return the ORM object - Transient
         """
+        if not self._check_file_ext(name):
+            raise Exception('not valid extension')
+
+        if not self._check_file_size(iobuf):
+            raise Exception('big size')
+
+
+        iobuf = self._remove_metadata_from_buffered_io(iobuf)
+
         if uploaded_at is None:
             uploaded_at = dt.datetime.now()
 
@@ -158,5 +172,32 @@ class Storage:
     
     def _lookup_filename(self, filename):
         """Ensure file always resides under directory"""
-        pth = self.dir.joinpath(pth.Path(filename).name)
-        return str(pth)
+        path = self.dir.joinpath(pth.Path(filename).name)
+        return str(path)
+
+    def get_all_id(self):
+        return self._Model.get_all_id()
+
+    def _check_file_ext(self, name: str,):
+        ext = os.path.splitext(name)[1]
+        if ext in ('.jpg', '.jpeg', '.jfif', '.png'):
+            return True
+
+    def _check_file_size(self, iobuf: io.BufferedIOBase):
+        iobuf.seek(0, io.SEEK_END)
+        file_size = iobuf.tell()
+        iobuf.seek(0)
+        if file_size > self.max_file_size:
+            return False
+        return True
+
+    def _remove_metadata_from_buffered_io(self, iobuf: io.BufferedIOBase):
+        iobuf.seek(0)
+        image = PIL.Image.open(iobuf)
+        new_buffer = io.BytesIO()
+        image.save(new_buffer, format=image.format)
+        new_buffer.seek(0)
+        return new_buffer
+
+
+
