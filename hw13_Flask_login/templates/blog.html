@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if posts %}
+<ul class=flashes>
+    {% for post in posts %}
+    <p></p>
+    <p>**************************************</p>
+    <p></p>
+    <div>
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">Post {{ post.post_id }}</h5>
+                <!--                <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>-->
+                <p class="card-text">{{ post.text }}</p>
+                {% if current_user.get_id() == post.autor|string %}
+                <a href="/change-post?post={{ post.post_id }}" class="btn btn-secondary me-3">Change</a>
+                <a href="/del-post?post={{ post.post_id }}" class="btn btn-warning me-3">Delete</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div>Autor {{ post.autor }}</div>
+        <div>Data {{ post.datetime }}</div>
+        <form method="POST" action="/add-comment" class="form">
+            <input type="hidden" name="post_id" value="{{ post.post_id }}">
+            <div class="col-sm-6">
+                <textarea class="form-control" name="message" placeholder="Your comment"
+                          style="height: 20px"></textarea>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-primary">Comment</button>
+            </div>
+        </form>
+        {% for comment in post.comments %}
+        <li>
+            <h6>User {{ comment.autor }} wrote a comment:</h6>
+        <h6>{{ comment.text }}</h6>
+        <div>{{ comment.datetime }}</div>
+        </li>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% endblock %}
