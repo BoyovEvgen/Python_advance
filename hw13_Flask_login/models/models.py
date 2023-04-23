@@ -6,6 +6,7 @@ from datetime import datetime
 class Post(db.Model):
     __tablename__ = "posts"
     post_id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=True)
     text = db.Column(db.String(1000), nullable=False)
     datetime = db.Column(db.DateTime, default=datetime.now)
     autor = db.Column(db.Integer, db.ForeignKey('users.id'))

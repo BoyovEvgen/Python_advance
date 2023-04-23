@@ -12,7 +12,7 @@
         <div class="card" style="width: 18rem;">
             <div class="card-body">
                 <h5 class="card-title">Post {{ post.post_id }}</h5>
-                <!--                <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>-->
+                <h6 class="card-subtitle mb-2 text-body-secondary">Title {{ post.title }}</h6>
                 <p class="card-text">{{ post.text }}</p>
                 {% if current_user.get_id() == post.autor|string %}
                 <a href="/change-post?post={{ post.post_id }}" class="btn btn-secondary me-3">Change</a>
@@ -36,8 +36,8 @@
         {% for comment in post.comments %}
         <li>
             <h6>User {{ comment.autor }} wrote a comment:</h6>
-        <h6>{{ comment.text }}</h6>
-        <div>{{ comment.datetime }}</div>
+            <h6>{{ comment.text }}</h6>
+            <div>{{ comment.datetime }}</div>
         </li>
         {% endfor %}
     </div>

@@ -1,9 +1,10 @@
 from flask import render_template, redirect, url_for, request, flash
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
-
+from sqlalchemy import func
 from app import app, db, manager
 from models import User, Post, Comment
+
 
 
 @app.route("/")
@@ -81,7 +82,8 @@ def blog():
 def add_post():
     if request.method == 'POST':
         message = request.form.get('message')
-        new_post = Post(text=message, autor=current_user.get_id())
+        title = request.form.get('title')
+        new_post = Post(text=message, title=title, autor=current_user.get_id())
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for('blog'))
@@ -114,9 +116,11 @@ def change_post():
     if request.method == 'POST':
         post_id = request.form.get('post_id')
         message = request.form.get('message')
+        title = request.form.get('title')
         post = Post.query.get(post_id)
         if current_user.get_id() == str(post.autor):
             post.text = message
+            post.title = title
             db.session.commit()
             return redirect(url_for('blog'))
         else:
@@ -136,6 +140,13 @@ def del_post():
     flash('You have no access')
     return redirect(url_for('blog'))
 
+
+@app.route('/search', methods=['POST'])
+def search():
+    search_title = request.form.get('search')
+    search_query = f'%{search_title}%'
+    filter_sorted_posts = Post.query.filter(func.lower(Post.title).like(func.lower(search_query))).all()
+    return render_template('blog.html', posts=filter_sorted_posts)
 
 
 @manager.user_loader
