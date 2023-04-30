@@ -1,6 +1,9 @@
 import hashlib
+
+import flask
+import sqlalchemy.exc
 from app import app, db
-from flask import render_template, request, redirect, session
+from flask import render_template, request, redirect, session, url_for
 from models import User, Article
 
 
@@ -19,16 +22,21 @@ def sign_up():
 def register():
     data = request.form
     password_hash = hashlib.sha256(data.get("password").encode("utf-8"))
-    user = User(
-        first_name=data.get("first_name"),
-        last_name=data.get("last_name"),
-        email=data.get("email"),
-        password=password_hash.hexdigest(),
-    )
-    db.session.add(user)
-    db.session.commit()
-    session["user"] = user.serialize
-    return redirect("/")
+    try:
+        user = User(
+            first_name=data.get("first_name"),
+            last_name=data.get("last_name"),
+            email=data.get("email"),
+            password=password_hash.hexdigest(),
+        )
+        db.session.add(user)
+        db.session.commit()
+        session["user"] = user.serialize
+        return redirect("/")
+    except sqlalchemy.exc.IntegrityError:
+        flask.flash('User with this email is already registered')
+        return redirect(url_for('sign_up'))
+
 
 
 @app.route("/sign-in")
@@ -43,6 +51,12 @@ def authorize():
     if user:
         if hashlib.sha256(data.get("password").encode("utf-8")).hexdigest() == user.password:
             session["user"] = user.serialize
+        else:
+            flask.flash('Wrong password')
+            return redirect(url_for('sign_in'))
+    else:
+        flask.flash('User with this email is not registered')
+        return redirect(url_for('sign_in'))
     return redirect("/")
 
 

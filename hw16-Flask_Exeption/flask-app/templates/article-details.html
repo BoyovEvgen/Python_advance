@@ -1,22 +1,20 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<h3>ARTICLE DETAILS</h3>
 <div class="cards">
-    {% for article in articles %}
-    <a href="/article/{{ article.id }}/details" class="text-decoration-none text-reset">
     <div class="card" style="width: 18rem;">
         <div class="card-body">
-            <h5 class="card-title">{{ article.title }}</h5>
-            <h6 class="card-subtitle mb-2 text-body-secondary">{{ article.created_at }}</h6>
-            <p class="card-text">{{ article.body|truncate(10, True, '...')|safe  }}</p>
+            <h4 class="card-title">{{ article.title }}</h4>
+            <h5 class="card-subtitle mb-2 text-body-secondary">{{ article.created_at }}</h5>
+            <p class="card-text">{{ article.body }}</p>
+            <p class="card-text">Article ID: {{ article.id }}</p>
+            <p class="card-text">Autor ID: {{ article.user_id }}</p>
             {% if session.get("user", {}).get("id", False) and article.user_id == session["user"]["id"] %}
                 <a href="/article/{{ article.id }}/delete" class="card-link">Delete</a>
             {% endif %}
         </div>
     </div>
-    </a>
-    {% endfor %}
 </div>
 
 
