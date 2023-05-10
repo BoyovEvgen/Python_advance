@@ -146,6 +146,7 @@ def search():
     search_title = request.form.get('search')
     search_query = f'%{search_title}%'
     filter_sorted_posts = Post.query.filter(func.lower(Post.title).like(func.lower(search_query))).all()
+    # filter_sorted_posts = Article.query.filter(Article.title.ilike(f'%{word}%')).all()
     return render_template('blog.html', posts=filter_sorted_posts)
 
 
